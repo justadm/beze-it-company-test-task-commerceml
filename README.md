@@ -15,6 +15,7 @@
 - `src/CommerceML/` — генерация CommerceML и отправка в `1c_exchange.php`.
 - `docs/architecture.md` — схема решения.
 - `docs/run.md` — пример запуска.
+- `docs/task.md` — исходная постановка задачи и принятая интерпретация требований.
 - `tests/run.php` — автономный запуск unit-тестов.
 
 ## План
