@@ -1,7 +1,7 @@
 ## 2026-03-19
 
 - Создан отдельный проект в `local/export/uralenergomash-test-task-commerceml`.
-- Проект изолирован от корневого git-репозитория `b24.loc`.
+- Проект изолирован от основного рабочего репозитория.
 - Для GitHub используется отдельный репозиторий `justadm/uralenergomash-test-task-commerceml`.
 - Русское название задания сохранено в `README.md` и description репозитория.
 - Для slug GitHub используется ASCII-имя без пробелов.
