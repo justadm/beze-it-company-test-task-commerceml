@@ -37,3 +37,41 @@ php local/export/commerceml/send.php \
   --packetSize=2000 \
   --dryRun=Y
 ```
+
+## Проверенный локальный пример
+
+Инфоблок для теста:
+- `IBLOCK_ID=14`
+- раздел `Товары`: `rootSectionId=13`
+- раздел `Услуги`: `rootSectionId=14`
+
+Примеры:
+
+```bash
+php local/export/commerceml/send.php \
+  --iblockId=14 \
+  --rootSectionId=13 \
+  --packetSize=2000 \
+  --dryRun=Y \
+  --workDir=/tmp/beze-it-commerceml-products
+```
+
+```bash
+php local/export/commerceml/send.php \
+  --iblockId=14 \
+  --rootSectionId=14 \
+  --packetSize=2000 \
+  --dryRun=Y \
+  --workDir=/tmp/beze-it-commerceml-services
+```
+
+Результат:
+- для `13` собран `import_001.xml` с `3` товарами;
+- для `14` собран `import_001.xml` с `3` услугами;
+- `offers_XXX.xml` не создается, потому что реальные торговые предложения пусты.
+
+## Тесты
+
+```bash
+php tests/run.php
+```

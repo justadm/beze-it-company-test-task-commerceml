@@ -55,7 +55,7 @@ final class OneCExchangeClient
 
 	private function checkAuth(HttpClient $client, string $targetUrl, string $login, string $password): array
 	{
-		$url = $this->buildUrl($targetUrl, [
+		$url = OneCExchangeProtocol::buildUrl($targetUrl, [
 			'type' => 'catalog',
 			'mode' => 'checkauth',
 			'USER_LOGIN' => $login,
@@ -65,62 +65,25 @@ final class OneCExchangeClient
 		]);
 
 		$response = $client->get($url);
-		$lines = $this->parseLines($response);
-
-		if (($lines[0] ?? '') !== 'success')
-		{
-			throw new RuntimeException('1C exchange checkauth failed: ' . implode(' | ', $lines));
-		}
-
-		if (count($lines) < 4)
-		{
-			throw new RuntimeException('Unexpected checkauth response: ' . implode(' | ', $lines));
-		}
+		$lines = OneCExchangeProtocol::parseLines($response);
+		$auth = OneCExchangeProtocol::parseCheckAuthResponse($lines);
 
 		$this->logger->info('1C exchange authenticated');
 
-		return [
-			'sessionName' => $lines[1],
-			'sessionId' => $lines[2],
-			'sessid' => $lines[3],
-		];
+		return $auth;
 	}
 
 	private function initExchange(HttpClient $client, string $targetUrl, string $sessid): array
 	{
-		$url = $this->buildUrl($targetUrl, [
+		$url = OneCExchangeProtocol::buildUrl($targetUrl, [
 			'type' => 'catalog',
 			'mode' => 'init',
 			'sessid' => $sessid,
 		]);
 
 		$response = $client->get($url);
-		$lines = $this->parseLines($response);
-
-		if (empty($lines))
-		{
-			throw new RuntimeException('Empty init response from 1C exchange.');
-		}
-
-		if (($lines[0] ?? '') === 'failure')
-		{
-			throw new RuntimeException('1C exchange init failed: ' . implode(' | ', $lines));
-		}
-
-		$fileLimit = 1024 * 1024;
-		foreach ($lines as $line)
-		{
-			if (strpos($line, 'file_limit=') === 0)
-			{
-				$fileLimit = (int)substr($line, strlen('file_limit='));
-				break;
-			}
-		}
-
-		if ($fileLimit <= 0)
-		{
-			$fileLimit = 1024 * 1024;
-		}
+		$lines = OneCExchangeProtocol::parseLines($response);
+		$fileLimit = OneCExchangeProtocol::extractFileLimit($lines);
 
 		$this->logger->info('1C exchange initialized', [
 			'fileLimit' => $fileLimit,
@@ -163,7 +126,7 @@ final class OneCExchangeClient
 				]);
 
 				$response = $client->post($url, $chunk);
-				$lines = $this->parseLines($response);
+				$lines = OneCExchangeProtocol::parseLines($response);
 				if (($lines[0] ?? '') !== 'success')
 				{
 					throw new RuntimeException('1C exchange file upload failed for ' . $filename . ': ' . implode(' | ', $lines));
@@ -195,7 +158,7 @@ final class OneCExchangeClient
 			]);
 
 			$response = $client->get($url);
-			$lines = $this->parseLines($response);
+			$lines = OneCExchangeProtocol::parseLines($response);
 			$status = $lines[0] ?? '';
 
 			if ($status === 'success')
@@ -234,7 +197,7 @@ final class OneCExchangeClient
 		]);
 
 		$response = $client->get($url);
-		$lines = $this->parseLines($response);
+		$lines = OneCExchangeProtocol::parseLines($response);
 
 		if (($lines[0] ?? '') !== 'success')
 		{
@@ -246,25 +209,6 @@ final class OneCExchangeClient
 
 	private function buildUrl(string $baseUrl, array $query): string
 	{
-		$separator = strpos($baseUrl, '?') === false ? '?' : '&';
-		return $baseUrl . $separator . http_build_query($query);
-	}
-
-	private function parseLines($response): array
-	{
-		if ($response === false || $response === null)
-		{
-			return [];
-		}
-
-		$response = trim((string)$response);
-		if ($response === '')
-		{
-			return [];
-		}
-
-		return array_values(array_filter(array_map('trim', preg_split('/\r\n|\r|\n/', $response) ?: []), static function (string $line): bool {
-			return $line !== '';
-		}));
+		return OneCExchangeProtocol::buildUrl($baseUrl, $query);
 	}
 }

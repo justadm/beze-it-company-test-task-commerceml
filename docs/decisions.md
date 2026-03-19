@@ -1,8 +1,8 @@
 ## 2026-03-19
 
-- Создан отдельный проект в `local/export/uralenergomash-test-task-commerceml`.
+- Создан отдельный проект в разделе `local/export/`.
 - Проект изолирован от основного рабочего репозитория.
-- Для GitHub используется отдельный репозиторий `justadm/uralenergomash-test-task-commerceml`.
+- Для GitHub используется отдельный публичный репозиторий проекта CommerceML.
 - Русское название задания сохранено в `README.md` и description репозитория.
 - Для slug GitHub используется ASCII-имя без пробелов.
 - Точка входа реализована как CLI-скрипт `local/export/commerceml/send.php`.
@@ -14,5 +14,13 @@
 - На принимающей стороне используется стандартный импорт `bitrix:catalog.import.1c`.
 - Ограничение 2000 применяется к родительским товарам, а SKU уходят в соответствующем `offers_XXX.xml`.
 - Добавлен режим `dryRun` для локальной генерации CommerceML без сетевого обмена.
-- Старый репозиторий `justadm/uralenergomash-test-task` переведен в `PRIVATE`.
-- Репозиторий `justadm/uralenergomash-test-task-commerceml` используется как актуальный и переведен в `PUBLIC`.
+- Для CLI-режима используется штатный bootstrap Bitrix: `bitrix/modules/main/cli/bootstrap.php`.
+- На тестовом каталоге `IBLOCK_ID=14` подтверждено:
+  - тип каталога `CATALOG_TYPE=X`;
+  - инфоблок предложений `15`;
+  - свойство связи SKU `62`;
+  - раздел `Товары` имеет ID `13`;
+  - раздел `Услуги` имеет ID `14`;
+  - всего элементов в каталоге `6`.
+- Dry run по разделу `13` сформировал один файл `import_001.xml` с `3` товарами и без `offers_XXX.xml`.
+- Dry run по разделу `14` сформировал один файл `import_001.xml` с `3` услугами и без `offers_XXX.xml`.

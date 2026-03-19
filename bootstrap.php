@@ -17,7 +17,7 @@ if ($documentRoot === false)
 
 $_SERVER['DOCUMENT_ROOT'] = $documentRoot;
 
-require_once $_SERVER['DOCUMENT_ROOT'] . '/bitrix/modules/main/include/prolog_before.php';
+require_once $_SERVER['DOCUMENT_ROOT'] . '/bitrix/modules/main/cli/bootstrap.php';
 
 spl_autoload_register(static function (string $class): void {
 	$prefix = 'UralenergomashTestTask\\';
