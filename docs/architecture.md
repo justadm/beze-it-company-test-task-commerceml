@@ -1,0 +1,47 @@
+## Архитектура
+
+### Точка входа
+
+- `local/export/commerceml/send.php` — CLI-скрипт.
+- `bootstrap.php` — подключение Bitrix и автозагрузки.
+
+### Сервисы
+
+- `CommerceMLExportCommand`:
+  - валидирует входные параметры;
+  - проверяет тип каталога через `CCatalog::GetByID()` и `CCatalogSku::GetInfoByIBlock()`;
+  - определяет наличие SKU через `CCatalogSku::GetInfoByProductIBlock()`;
+  - запускает сбор CommerceML-пакетов и отправку в `1c_exchange.php`.
+- `CommerceMLPackageBuilder`:
+  - получает корневой раздел;
+  - режет родительские товары на пакеты до 2000;
+  - создает `import_XXX.xml`;
+  - создает `offers_XXX.xml` для SKU соответствующего пакета.
+- `ScopedCommerceMLExport`:
+  - расширяет `CIBlockCMLExport`;
+  - ограничивает экспорт выбранным разделом и его поддеревом;
+  - запоминает ID элементов, вошедших в пакет.
+- `OneCExchangeClient`:
+  - выполняет `checkauth`, `init`, `file`, `import`, `complete`;
+  - использует `Bitrix\Main\Web\HttpClient`;
+  - работает с session cookie и `sessid`, возвращенными штатным протоколом.
+- `dryRun`:
+  - строит CommerceML-файлы;
+  - не выполняет сетевой обмен;
+  - позволяет проверить состав пакетов локально.
+
+### Ограничение 2000
+
+- Лимит применяется к родительским товарам.
+- Все SKU родительского товара отправляются в том же пакете, что и сам товар.
+
+### Endpoint приема
+
+- Используется стандартный endpoint `/bitrix/admin/1c_exchange.php?type=catalog`.
+- Принимающая сторона не требует пользовательского кода.
+- Передача идет по штатному 1С-протоколу:
+  - `checkauth`
+  - `init`
+  - `file`
+  - `import`
+  - `complete`
